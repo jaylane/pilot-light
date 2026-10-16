@@ -4,6 +4,8 @@
 
 <h1 align="center">Pilot Light</h1>
 
+<p align="center"><a href="https://github.com/jaylane/pilot-light/actions/workflows/ci.yml"><img src="https://github.com/jaylane/pilot-light/actions/workflows/ci.yml/badge.svg" alt="CI"></a></p>
+
 A Claude Code mod that keeps an eye on your prompt cache. It draws one strip above the prompt box:
 
 ```
@@ -53,6 +55,14 @@ tsc -p .
 ```
 
 Or run a session with the folder loaded: `claude --plugin-dir .`
+
+CI runs validate and test on every push and pull request. To release, bump `version` in `.claude-plugin/plugin.json`, commit, then tag it:
+
+```
+git tag v0.3.1 && git push origin v0.3.1
+```
+
+The release workflow re-runs the checks, confirms the tag matches the manifest version, and publishes a GitHub release with generated notes. Installed copies pick it up with `claude plugin update pilot-light`.
 
 ## License
 
