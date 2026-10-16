@@ -1,6 +1,6 @@
 {
   "name": "pilot-light",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Band above the prompt: prompt-cache countdown, context size, 5h/7d limits, API-equivalent cost, cost of a cold next message, silent keep-alive pings under a dollar cap, and a Handoff & Clear button.",
   "types": "./types/index.d.ts",
   "license": "MIT",

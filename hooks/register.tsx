@@ -339,7 +339,7 @@ export const register: Register = (on, options) => {
         <Text dimColor>💰 {fmtUsd(s.costUsd)}</Text>
         <Text dimColor>🧊 next {fmtUsd(cold)} (warm {fmtUsd(warm)})</Text>
         <Text dimColor>💸 saved {fmtUsd(s.savedUsd)}</Text>
-        <Button key="handoff" label="Handoff & Clear" onPress={() => handoff($)} />
+        <Button key="handoff" label="📋🧹" onPress={() => handoff($)} />
       </Box>
     )
   })
