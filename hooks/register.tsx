@@ -299,12 +299,12 @@ export const register: Register = (on, options) => {
     const state = s.isWorking
       ? 'working'
       : remaining === null
-        ? 'no requests yet'
+        ? 'no cache yet'
         : remaining <= 0
           ? 'cold'
           : fmtClock(remaining)
     const cold = coldUsdOf(s, ttl)
-    const pings = s.keepAlives ? ` · pings ${s.keepAlives} ${fmtUsd(s.pingUsd)}/${fmtUsd(cold)}` : ''
+    const pings = s.keepAlives ? ` · 🔁 ${s.keepAlives} ${fmtUsd(s.pingUsd)}/${fmtUsd(cold)}` : ''
     const failed = s.pingFailed ? ' · ping failed' : ''
     const tone =
       remaining === null || s.isWorking || remaining > warnLeadOf(ttl)
@@ -322,11 +322,11 @@ export const register: Register = (on, options) => {
 
     return (
       <Box flexWrap="wrap" gap={2}>
-        <Text {...tone}>cache {state} /{ttlTag}{pings}{failed}</Text>
-        <Text dimColor>ctx {fmtK(s.contextTokens)}/{fmtK(s.window)}{pct}</Text>
-        <Text dimColor>{limit('five_hour', '5h')} · {limit('seven_day', '7d')}</Text>
-        <Text dimColor>session {fmtUsd(s.costUsd)}</Text>
-        <Text dimColor>next if cold {fmtUsd(cold)} (warm {fmtUsd(warm)})</Text>
+        <Text {...tone}>{remaining !== null && remaining <= 0 ? '🧊' : '🔥'} {state} /{ttlTag}{pings}{failed}</Text>
+        <Text dimColor>🧠 {fmtK(s.contextTokens)}/{fmtK(s.window)}{pct}</Text>
+        <Text dimColor>📊 {limit('five_hour', '5h')} · {limit('seven_day', '7d')}</Text>
+        <Text dimColor>💰 {fmtUsd(s.costUsd)}</Text>
+        <Text dimColor>🧊 next {fmtUsd(cold)} (warm {fmtUsd(warm)})</Text>
         <Button key="handoff" label="Handoff & Clear" onPress={() => handoff($)} />
       </Box>
     )

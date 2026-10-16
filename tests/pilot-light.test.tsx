@@ -124,12 +124,12 @@ test('band shows the countdown, context, limits and costs on every surface', asy
 
   for (const surface of ['terminal', 'desktop'] as const) {
     const ui = await $.ui.mount({ ...BAND, surface })
-    expect(await ui.find({ type: 'Text', text: /cache 58:30 \/60m\?/ })).toBeDefined()
-    expect(await ui.find({ type: 'Text', text: /ctx 200k\/1\.0M \(20%\)/ })).toBeDefined()
-    expect(await ui.find({ type: 'Text', text: /5h 24% · 7d 41%/ })).toBeDefined()
-    expect(await ui.find({ type: 'Text', text: /session \$12\.34/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /🔥 58:30 \/60m\?/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /🧠 200k\/1\.0M \(20%\)/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /📊 5h 24% · 7d 41%/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /💰 \$12\.34/ })).toBeDefined()
     // 200k tokens on Fable 5.1 under an (unverified) 1-hour window: cold = 200k * $10 * 2 / 1M; warm = 200k * $0.25 / 1M
-    expect(await ui.find({ type: 'Text', text: /next if cold \$4\.00 \(warm \$0\.05\)/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /🧊 next \$4\.00 \(warm \$0\.05\)/ })).toBeDefined()
     expect(await ui.find({ type: 'Button', key: 'handoff' })).toBeDefined()
     await ui.unmount()
   }
@@ -153,7 +153,7 @@ test('warns once five minutes out, then pings by forking the cached transcript, 
   expect(c.fork).toEqual(['Reply with exactly: ok.'])
   expect(c.submit).toHaveLength(0)
   const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
-  expect(await ui.find({ type: 'Text', text: /cache 59:40 \/60m\? · pings 1 \$0\.07\/\$4\.00/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /🔥 59:40 \/60m\? · 🔁 1 \$0\.07\/\$4\.00/ })).toBeDefined()
   await ui.unmount()
 
   // Second stretch: no second notification, one more ping.
@@ -178,7 +178,7 @@ test('pings stop once a stretch has cost as much as a cold re-send, and the pers
   await clock.advance(10 * MINUTE)
   expect(c.fork).toHaveLength(2)
   const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
-  expect(await ui.find({ type: 'Text', text: /cache cold \/5m · pings 2 \$2\.10\/\$2\.50/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /🧊 cold \/5m · 🔁 2 \$2\.10\/\$2\.50/ })).toBeDefined()
   await ui.unmount()
 
   // Automation prompts do not re-arm; the person's own Enter does.
@@ -208,7 +208,7 @@ test('a failed ping ends the stretch instead of retrying every second', async ($
   await clock.advance(6 * MINUTE)
   expect(c.fork).toHaveLength(1)
   const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
-  expect(await ui.find({ type: 'Text', text: /cache cold \/5m · ping failed/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /🧊 cold \/5m · ping failed/ })).toBeDefined()
   await ui.unmount()
 })
 
@@ -222,8 +222,8 @@ test('reads the real TTL from the transcript usage and prices the 5m write at 1.
   expect(c.argv[0]).toEqual(['tail', '-c', '1000000', '/t/s.jsonl'])
 
   const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
-  expect(await ui.find({ type: 'Text', text: /cache 5:00 \/5m/ })).toBeDefined()
-  expect(await ui.find({ type: 'Text', text: /next if cold \$2\.50 \(warm \$0\.05\)/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /🔥 5:00 \/5m/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /🧊 next \$2\.50 \(warm \$0\.05\)/ })).toBeDefined()
   await ui.unmount()
 
   // Half the window is the lead on a short TTL: warned at 2:30, pinged at 0:20.
@@ -246,7 +246,7 @@ test('the countdown anchors on the last request start, not the end of a slow res
   await $.turn.complete({ answer: 'ok', durationMs: 90_000, isAborted: false, turnId: 't1', reason: 'answer', usage: TURN_USAGE })
 
   const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
-  expect(await ui.find({ type: 'Text', text: /cache 58:30 / })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /🔥 58:30 / })).toBeDefined()
   await ui.unmount()
 })
 
@@ -292,7 +292,7 @@ test('one fork at a time, and a fork that lands after the person prompts is disc
   await clock.advance(5_000)
 
   const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
-  expect(await ui.find({ type: 'Text', text: /cache 4:55 \/5m$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /🔥 4:55 \/5m$/ })).toBeDefined()
   await ui.unmount()
   expect(c.fork).toHaveLength(1)
 })
