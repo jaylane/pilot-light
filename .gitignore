@@ -1,0 +1,4 @@
+.remember/
+.DS_Store
+*.log
+.mcpb-cache/

@@ -1,0 +1,20 @@
+{
+  "name": "cache-keeper",
+  "version": "0.2.0",
+  "description": "Band above the prompt: prompt-cache countdown, context size, 5h/7d limits, API-equivalent cost, cost of a cold next message, silent keep-alive pings under a dollar cap, and a Handoff & Clear button.",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "cacheWindowMinutes": {
+      "type": "number",
+      "title": "Cache window (minutes)",
+      "description": "Prompt-cache lifetime in minutes, used until the real one (5m or 1h) is detected from API usage.",
+      "default": 60
+    },
+    "keepAlive": {
+      "type": "boolean",
+      "title": "Keep-alive pings",
+      "description": "While you are away, re-read the cached conversation shortly before it expires. Pings stop once they have cost as much as one cold re-send would, and start again when you next prompt.",
+      "default": true
+    }
+  }
+}
