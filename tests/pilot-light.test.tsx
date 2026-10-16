@@ -136,7 +136,8 @@ test('band shows the countdown, context, limits and costs on every surface', asy
   }
 })
 
-test('warns once five minutes out, then pings by forking the cached transcript, never as a prompt', async ($, on) => {
+// Hours of mock clock at one tick a second: slow on a CI runner.
+test('warns once five minutes out, then pings by forking the cached transcript, never as a prompt', { timeoutMs: 60_000 }, async ($, on) => {
   const c = calls()
   world(on, c, { fork: { ...BRIEF, usage: PING_USAGE } })
   const clock = mock.clock(on, { now: 1_000_000 })
@@ -177,7 +178,8 @@ test('warns once five minutes out, then pings by forking the cached transcript, 
   await later.unmount()
 })
 
-test('pings stop once a stretch has cost as much as a cold re-send, and the person re-arms them', async ($, on) => {
+// Hours of mock clock at one tick a second: slow on a CI runner.
+test('pings stop once a stretch has cost as much as a cold re-send, and the person re-arms them', { timeoutMs: 60_000 }, async ($, on) => {
   const c = calls()
   world(on, c, { transcriptTail: FIVE_MINUTE_TAIL, fork: { ...BRIEF, usage: COSTLY_PING_USAGE } })
   const clock = mock.clock(on, { now: 1_000_000 })
