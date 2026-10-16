@@ -1,7 +1,8 @@
 <p align="center">
   <img src="assets/pilot-light.png" alt="Pilot Light" width="200">
-  # Pilot Light
 </p>
+
+<h1 align="center">Pilot Light</h1>
 
 A Claude Code mod that keeps an eye on your prompt cache. It draws one strip above the prompt box:
 
