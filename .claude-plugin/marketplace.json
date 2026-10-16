@@ -1,5 +1,5 @@
 {
-  "name": "cache-keeper",
+  "name": "pilot-light",
   "owner": { "name": "jaylane" },
-  "plugins": [{ "name": "cache-keeper", "source": "./" }]
+  "plugins": [{ "name": "pilot-light", "source": "./" }]
 }

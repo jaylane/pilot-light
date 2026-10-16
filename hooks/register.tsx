@@ -31,7 +31,7 @@ const INITIAL: Snap = {
 // The shape tag versions the stored value: bump it whenever Snap gains a field,
 // or a reload reads the previous version's snapshot and arithmetic on its
 // missing fields lands null in the store.
-const snap = atom({ plugin: 'cache-keeper', key: 'snap' } as const, INITIAL, { shape: 'v2' })
+const snap = atom({ plugin: 'pilot-light', key: 'snap' } as const, INITIAL, { shape: 'v2' })
 
 // What a fresh stretch of pings starts from; also what a person's prompt restores.
 const RESTED = { pinging: false, keepAlives: 0, pingUsd: 0, lastPingUsd: 0, pingFailed: false, warned: false }
@@ -141,7 +141,7 @@ async function ping($: EngineInterface, s: Snap, ttl: number) {
     reply = await $.model.fork({ prompt: PING_PROMPT })
   } catch (error) {
     await update($, snap, x => ({ ...x, pinging: false, pingFailed: true }))
-    $.ui.log(`cache-keeper: keep-alive ping refused (${String(error)}); no more until you prompt`)
+    $.ui.log(`pilot-light: keep-alive ping refused (${String(error)}); no more until you prompt`)
     return
   }
   const served = reply.isAnswered || reply.reason === 'empty-reply'
@@ -164,8 +164,8 @@ async function ping($: EngineInterface, s: Snap, ttl: number) {
   )
   $.ui.log(
     served
-      ? `cache-keeper: keep-alive ping ${s.keepAlives + 1} cost ${fmtUsd(usd)}, ${fmtUsd(s.pingUsd + usd)} of ${fmtUsd(cold)} this stretch`
-      : `cache-keeper: keep-alive ping failed (${reply.isAnswered ? 'unknown' : reply.reason}); no more until you prompt`,
+      ? `pilot-light: keep-alive ping ${s.keepAlives + 1} cost ${fmtUsd(usd)}, ${fmtUsd(s.pingUsd + usd)} of ${fmtUsd(cold)} this stretch`
+      : `pilot-light: keep-alive ping failed (${reply.isAnswered ? 'unknown' : reply.reason}); no more until you prompt`,
   )
 }
 
@@ -185,7 +185,7 @@ async function tick($: EngineInterface, cfg: Config) {
     await update($, snap, x => ({ ...x, warned: true }))
     const text = `Prompt cache goes cold in ${fmtClock(remaining)}. Send a message to keep it warm.`
     $.ui.toast(text)
-    void $.ui.notify(text, { title: 'Cache Keeper' }).catch(() => undefined)
+    void $.ui.notify(text, { title: 'Pilot Light' }).catch(() => undefined)
   }
   if (cfg.keepAlive && !s.pingFailed && remaining <= PING_LEAD_MS) await ping($, s, ttl)
 }
@@ -201,7 +201,7 @@ async function handoff($: EngineInterface) {
   const draft = (await $.prompt.read()).text.trim()
   const home = (await $.env.get('HOME')) ?? (await $.session.cwd())
   const stamp = new Date(await $.clock.now()).toISOString().replace(/[:.]/g, '-')
-  const path = `${home}/.claude/cache-keeper/handoff-${stamp}.md`
+  const path = `${home}/.claude/pilot-light/handoff-${stamp}.md`
   await $.fs.write(path, `${brief}\n`)
   await $.command.run({ command: 'clear' })
   const text =
@@ -222,7 +222,7 @@ export const register: Register = (on, options) => {
     // A reload mid-fork drops the continuation that would have cleared the flag.
     await update($, snap, s => ({ ...s, pinging: false }))
     if (e.isInteractive) {
-      $.clock.every(1000, () => void tick($, cfg).catch(error => $.ui.log(`cache-keeper: tick failed: ${String(error)}`)))
+      $.clock.every(1000, () => void tick($, cfg).catch(error => $.ui.log(`pilot-light: tick failed: ${String(error)}`)))
     }
     return next(e)
   })

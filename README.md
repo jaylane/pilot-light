@@ -1,4 +1,4 @@
-# Cache Keeper
+# Pilot Light
 
 A Claude Code mod that keeps an eye on your prompt cache. It draws one strip above the prompt box:
 
@@ -14,23 +14,23 @@ cache 4:32 /5m · pings 7 $0.41/$2.50   ctx 220k/1.0M (22%)   5h 24% · 7d 41%  
 
 Five minutes before the cache goes cold (or at half the window, when the window is shorter) you get a native notification. If you have not replied by twenty seconds before expiry, the mod forks the cached conversation with a one-word prompt, which refreshes the cache without touching your transcript. Pings stop once a stretch has cost as much as one cold re-send would, and start again when you next press Enter. A `/loop`, cron or background task does not re-arm them.
 
-**Handoff & Clear** asks the model for a sub-400-word handoff brief over the cached transcript, saves it under `~/.claude/cache-keeper/`, runs `/clear`, and pastes the brief (plus anything you had typed) into the fresh prompt box. You press Enter to send it.
+**Handoff & Clear** asks the model for a sub-400-word handoff brief over the cached transcript, saves it under `~/.claude/pilot-light/`, runs `/clear`, and pastes the brief (plus anything you had typed) into the fresh prompt box. You press Enter to send it.
 
 ## Install
 
 At the prompt of a terminal session:
 
 ```
-/plugin install cache-keeper --marketplace jaylane/cache-keeper
+/plugin install pilot-light --marketplace jaylane/pilot-light
 ```
 
 Answer `y` to add the marketplace, then pick a scope. From a shell:
 
 ```
-claude plugin install cache-keeper --marketplace jaylane/cache-keeper
+claude plugin install pilot-light --marketplace jaylane/pilot-light
 ```
 
-In the desktop app, click + next to the prompt box, then Plugins, Add marketplace with `jaylane/cache-keeper`, then Add plugin.
+In the desktop app, click + next to the prompt box, then Plugins, Add marketplace with `jaylane/pilot-light`, then Add plugin.
 
 ## Settings
 

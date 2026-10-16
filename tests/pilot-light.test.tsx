@@ -2,7 +2,7 @@ import { expect, mock, test } from 'claude-code/testing'
 import type { Engine } from 'claude-code/testing'
 import type { On } from 'claude-code'
 
-const PLUGIN = 'cache-keeper'
+const PLUGIN = 'pilot-light'
 const MINUTE = 60_000
 
 const BAND = {
@@ -265,7 +265,7 @@ test('Handoff & Clear writes the brief, clears, and pastes it with any pending d
 
   expect(c.fork).toHaveLength(2)
   expect(c.write).toHaveLength(2)
-  expect(c.write[0]).toMatch(/^\/home\/tester\/\.claude\/cache-keeper\/handoff-.*\.md$/)
+  expect(c.write[0]).toMatch(/^\/home\/tester\/\.claude\/pilot-light\/handoff-.*\.md$/)
   expect(c.run).toEqual(['clear', 'clear'])
   expect(c.fill[0]).toContain('Goal: ship it.')
   expect(c.fill[0]).toContain(c.write[0]!)
