@@ -47,13 +47,22 @@ type ForkReply =
   | { isAnswered: true; text: string; usage: typeof PING_USAGE }
   | { isAnswered: false; reason: 'api-error'; status: number; error: 'rate_limit'; usage: typeof PING_USAGE }
 type Calls = { notify: string[]; submit: string[]; fork: string[]; fill: string[]; run: string[]; write: string[]; argv: string[][] }
-type World = { transcriptTail?: string; draft?: string; fork?: ForkReply; beforeFork?: () => Promise<void> }
+type World = { transcriptTail?: string; draft?: string; fork?: ForkReply; beforeFork?: () => Promise<void>; store?: Map<string, unknown> }
 
 const BRIEF = { isAnswered: true as const, text: '# Brief\n\nGoal: ship it.', usage: PING_USAGE }
 
 // The engine beneath the plugin: every call it makes answered from memory.
-const world = (on: On, calls: Calls, { transcriptTail = '', draft = '', fork = BRIEF, beforeFork }: World = {}) => {
-  mock.store(on)
+const world = (on: On, calls: Calls, { transcriptTail = '', draft = '', fork = BRIEF, beforeFork, store }: World = {}) => {
+  if (store) {
+    // A store the test holds, so it can write mid-session as another session would.
+    on('store.get', ($, e) => ({ value: store.get(e.key) }))
+    on('store.set', ($, e) => {
+      store.set(e.key, e.value)
+      return { value: undefined }
+    })
+  } else {
+    mock.store(on)
+  }
   on('session.usage', () => ({ value: USAGE }))
   on('session.model', () => ({ value: MODEL }))
   on('ui.toast', () => ({ value: undefined }))
@@ -213,6 +222,28 @@ test('pings stop once a stretch has cost as much as a cold re-send, and the pers
   await back.unmount()
   await clock.advance(5 * MINUTE)
   expect(c.fork).toHaveLength(3)
+})
+
+test('a return adds its credit to the stored total, so overlapping sessions all count', async ($, on) => {
+  const c = calls()
+  const store = new Map<string, unknown>([['savedUsd', 1]])
+  world(on, c, { transcriptTail: FIVE_MINUTE_TAIL, fork: { ...BRIEF, usage: COSTLY_PING_USAGE }, store })
+  const clock = mock.clock(on, { now: 1_000_000 })
+  await $.session.start({ cwd: '/w', surface: 'terminal', isInteractive: true })
+  await respond($)
+  await detectFiveMinutes($, clock)
+
+  // Another session credits $2 while this one runs.
+  store.set('savedUsd', 3)
+  // One $1.05 ping keeps the $2.50 cold re-send away: this session's credit is $1.45.
+  await clock.advance(5 * MINUTE)
+  expect(c.fork).toHaveLength(1)
+  await $.prompt.submit({ text: 'back', wait: false, origin: { kind: 'composer' } })
+  await respond($)
+  const back = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  expect(await back.find({ type: 'Text', text: /💸 saved \$4\.45/ })).toBeDefined()
+  await back.unmount()
+  expect((store.get('savedUsd') as number).toFixed(2)).toBe('4.45')
 })
 
 test('a failed ping ends the stretch instead of retrying every second', async ($, on) => {

@@ -285,7 +285,8 @@ export const register: Register = (on, options) => {
       const ttl = ttlOf(s, cfg)
       const warm = s.lastResponseAt > 0 && s.lastResponseAt + ttl > (await $.clock.now())
       const saved = s.keepAlives && warm ? Math.max(0, coldUsdOf(s, ttl) - s.pingUsd) : 0
-      const savedUsd = s.savedUsd + saved
+      // Re-read the store: another session may have added to it since this one started.
+      const savedUsd = saved ? (Number(await $.store.get('savedUsd')) || 0) + saved : s.savedUsd
       if (saved) await $.store.set('savedUsd', savedUsd)
       await update($, snap, x => ({ ...x, ...RESTED, savedUsd }))
     }
