@@ -48,3 +48,7 @@ tsc -p .
 ```
 
 Or run a session with the folder loaded: `claude --plugin-dir .`
+
+## License
+
+MIT. See `LICENSE`.
