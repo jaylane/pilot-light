@@ -53,6 +53,7 @@ const BRIEF = { isAnswered: true as const, text: '# Brief\n\nGoal: ship it.', us
 
 // The engine beneath the plugin: every call it makes answered from memory.
 const world = (on: On, calls: Calls, { transcriptTail = '', draft = '', fork = BRIEF, beforeFork }: World = {}) => {
+  mock.store(on)
   on('session.usage', () => ({ value: USAGE }))
   on('session.model', () => ({ value: MODEL }))
   on('ui.toast', () => ({ value: undefined }))
@@ -160,6 +161,20 @@ test('warns once five minutes out, then pings by forking the cached transcript, 
   await clock.advance(60 * MINUTE)
   expect(c.notify).toHaveLength(1)
   expect(c.fork).toHaveLength(2)
+
+  // Coming back while the pinged cache is warm credits the avoided cold re-send ($4.00) less the pings ($0.13).
+  await $.prompt.submit({ text: 'back', wait: false, origin: { kind: 'composer' } })
+  await respond($)
+  const back = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  expect(await back.find({ type: 'Text', text: /💸 saved \$3\.87/ })).toBeDefined()
+  await back.unmount()
+  // A later stretch (one ping, $0.07) adds its own credit: $3.87 + $3.93.
+  await clock.advance(61 * MINUTE)
+  await $.prompt.submit({ text: 'again', wait: false, origin: { kind: 'composer' } })
+  await respond($)
+  const later = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  expect(await later.find({ type: 'Text', text: /💸 saved \$7\.80/ })).toBeDefined()
+  await later.unmount()
 })
 
 test('pings stop once a stretch has cost as much as a cold re-send, and the person re-arms them', async ($, on) => {
@@ -190,6 +205,10 @@ test('pings stop once a stretch has cost as much as a cold re-send, and the pers
   }
   await $.prompt.submit({ text: 'back', wait: false, origin: { kind: 'composer' } })
   await respond($)
+  // The cache was cold when the person came back, so the capped stretch saved nothing.
+  const back = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  expect(await back.find({ type: 'Text', text: /💸 saved \$0\.00/ })).toBeDefined()
+  await back.unmount()
   await clock.advance(5 * MINUTE)
   expect(c.fork).toHaveLength(3)
 })

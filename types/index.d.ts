@@ -27,6 +27,8 @@ export type Snap = {
   pingFailed: boolean
   /** A cold-cache notification went out since the person last prompted. */
   warned: boolean
+  /** Lifetime: cold re-sends the pings avoided, less their cost; mirrored from $.store. */
+  savedUsd: number
 }
 
 declare module 'claude-code' {

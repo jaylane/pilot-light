@@ -27,11 +27,12 @@ const INITIAL: Snap = {
   lastPingUsd: 0,
   pingFailed: false,
   warned: false,
+  savedUsd: 0,
 }
 // The shape tag versions the stored value: bump it whenever Snap gains a field,
 // or a reload reads the previous version's snapshot and arithmetic on its
 // missing fields lands null in the store.
-const snap = atom({ plugin: 'pilot-light', key: 'snap' } as const, INITIAL, { shape: 'v2' })
+const snap = atom({ plugin: 'pilot-light', key: 'snap' } as const, INITIAL, { shape: 'v3' })
 
 // What a fresh stretch of pings starts from; also what a person's prompt restores.
 const RESTED = { pinging: false, keepAlives: 0, pingUsd: 0, lastPingUsd: 0, pingFailed: false, warned: false }
@@ -91,9 +92,11 @@ const warnLeadOf = (ttl: number) => Math.min(WARN_LEAD_MS, ttl / 2)
 async function measure($: EngineInterface) {
   const u = await $.session.usage()
   const model = await $.session.model()
+  const savedUsd = Number(await $.store.get('savedUsd')) || 0
   await update($, snap, s => ({
     ...s,
     model,
+    savedUsd,
     contextTokens: u.context.tokens ?? s.contextTokens,
     window: u.context.window,
     rateLimits: u.rateLimits.map(r => ({ kind: r.kind, percentUsed: r.percentUsed })),
@@ -276,7 +279,15 @@ export const register: Register = (on, options) => {
     // Only the person's own Enter re-arms the pings: a /loop, a task
     // notification or a peer message arriving while they are away must not.
     if (e.origin.kind === 'composer' || e.origin.kind === 'bridge') {
-      await update($, snap, s => ({ ...s, ...RESTED }))
+      // Coming back to a cache the pings kept warm: the cold re-send that
+      // did not happen, less what the pings cost, is what the stretch saved.
+      const s = await read($, snap)
+      const ttl = ttlOf(s, cfg)
+      const warm = s.lastResponseAt > 0 && s.lastResponseAt + ttl > (await $.clock.now())
+      const saved = s.keepAlives && warm ? Math.max(0, coldUsdOf(s, ttl) - s.pingUsd) : 0
+      const savedUsd = s.savedUsd + saved
+      if (saved) await $.store.set('savedUsd', savedUsd)
+      await update($, snap, x => ({ ...x, ...RESTED, savedUsd }))
     }
     return next(e)
   }).catch(($, e, next) => next(e))
@@ -327,6 +338,7 @@ export const register: Register = (on, options) => {
         <Text dimColor>📊 {limit('five_hour', '5h')} · {limit('seven_day', '7d')}</Text>
         <Text dimColor>💰 {fmtUsd(s.costUsd)}</Text>
         <Text dimColor>🧊 next {fmtUsd(cold)} (warm {fmtUsd(warm)})</Text>
+        <Text dimColor>💸 saved {fmtUsd(s.savedUsd)}</Text>
         <Button key="handoff" label="Handoff & Clear" onPress={() => handoff($)} />
       </Box>
     )
