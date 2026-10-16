@@ -6,8 +6,6 @@
 
 <p align="center"><a href="https://github.com/jaylane/pilot-light/actions/workflows/ci.yml"><img src="https://github.com/jaylane/pilot-light/actions/workflows/ci.yml/badge.svg" alt="CI"></a><a href="https://github.com/jaylane/pilot-light/actions/workflows/release.yml"><img src="https://github.com/jaylane/pilot-light/actions/workflows/release.yml/badge.svg" alt="Release"></a></p>
 
-(https://github.com/jaylane/pilot-light/actions/workflows/release.yml
-
 A Claude Code mod that keeps an eye on your prompt cache. It draws one strip above the prompt box:
 
 ```
