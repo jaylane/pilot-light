@@ -124,6 +124,22 @@ const detectFiveMinutes = async ($: Engine, clock: { settle: () => Promise<void>
   await clock.settle()
 }
 
+test('another mod drawing above the prompt shows below the band', async ($, on) => {
+  const c = calls()
+  world(on, c)
+  mock.clock(on, { now: 1_000_000 })
+  // Another mod in the same slot, beneath pilot-light in the chain.
+  on('ui.render', ($, e) => {
+    const { Text } = $.ui.resolve(e)
+    return <Text>other band</Text>
+  })
+  await $.session.start({ cwd: '/w', surface: 'terminal', isInteractive: true })
+  const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  expect(await ui.find({ type: 'Button', key: 'handoff' })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /other band/ })).toBeDefined()
+  await ui.unmount()
+})
+
 test('band shows the countdown, context, limits and costs on every surface', async ($, on) => {
   const c = calls()
   world(on, c)

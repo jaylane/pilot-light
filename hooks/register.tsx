@@ -302,6 +302,9 @@ export const register: Register = (on, options) => {
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     if (e.props.hasSurvey) return next(e)
+    // Other mods share this slot: draw theirs below ours instead of replacing it.
+    // next(e) rejects only when nothing answers beneath (the test harness): the band still draws.
+    const below = await next(e).catch(() => undefined)
     const s = await read($, snap)
     const { Box, Button, Text } = $.ui.resolve(e)
 
@@ -332,7 +335,7 @@ export const register: Register = (on, options) => {
       return r ? `${label} ${Math.round(r.percentUsed)}%` : `${label} n/a`
     }
 
-    return (
+    const mine = (
       <Box flexWrap="wrap" gap={2}>
         <Text {...tone}>{remaining !== null && remaining <= 0 ? '🧊' : '🔥'} {state} /{ttlTag}{pings}{failed}</Text>
         <Text dimColor>🧠 {fmtK(s.contextTokens)}/{fmtK(s.window)}{pct}</Text>
@@ -343,5 +346,6 @@ export const register: Register = (on, options) => {
         <Button key="handoff" label="📋🧹" onPress={() => handoff($)} />
       </Box>
     )
+    return below ? <Box flexDirection="column">{mine}{below}</Box> : mine
   })
 }
