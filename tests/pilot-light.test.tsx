@@ -143,6 +143,12 @@ test('band shows the countdown, context, limits and costs on every surface', asy
     expect(await ui.find({ type: 'Button', key: 'handoff' })).toBeDefined()
     await ui.unmount()
   }
+
+  // API billing reports no windows: the segment is hidden rather than drawn as n/a.
+  await $.session.measure({ context: USAGE.context, rateLimits: [], cost: USAGE.cost, changed: ['rateLimits'] })
+  const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  expect(await ui.find({ type: 'Text', text: /📊/ })).toBeUndefined()
+  await ui.unmount()
 })
 
 // Hours of mock clock at one tick a second: slow on a CI runner.

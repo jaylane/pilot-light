@@ -327,16 +327,14 @@ export const register: Register = (on, options) => {
 
     const warm = (s.contextTokens * priceOf(s.model)[2]) / 1e6
     const pct = s.window ? ` (${Math.round((100 * s.contextTokens) / s.window)}%)` : ''
-    const limit = (kind: string, label: string) => {
-      const r = s.rateLimits.find(r => r.kind === kind)
-      return r ? `${label} ${Math.round(r.percentUsed)}%` : `${label} n/a`
-    }
+    // Only a subscription reports rate-limit windows; API billing never does.
+    const limits = s.rateLimits.map(r => `${r.kind === 'five_hour' ? '5h' : r.kind === 'seven_day' ? '7d' : r.kind} ${Math.round(r.percentUsed)}%`).join(' · ')
 
     return (
       <Box flexWrap="wrap" gap={2}>
         <Text {...tone}>{remaining !== null && remaining <= 0 ? '🧊' : '🔥'} {state} /{ttlTag}{pings}{failed}</Text>
         <Text dimColor>🧠 {fmtK(s.contextTokens)}/{fmtK(s.window)}{pct}</Text>
-        <Text dimColor>📊 {limit('five_hour', '5h')} · {limit('seven_day', '7d')}</Text>
+        {limits ? <Text dimColor>📊 {limits}</Text> : null}
         <Text dimColor>💰 {fmtUsd(s.costUsd)}</Text>
         <Text dimColor>🧊 next {fmtUsd(cold)} (warm {fmtUsd(warm)})</Text>
         <Text dimColor>💸 saved {fmtUsd(s.savedUsd)}</Text>
