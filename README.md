@@ -15,7 +15,7 @@ A Claude Code mod that keeps an eye on your prompt cache. It draws one strip abo
 
 - **🔥** counts down until the prompt cache goes cold, anchored on the start of the last API request. The window (5m or 1h) is read from the API's own usage breakdown in the transcript; until then the configured default shows with a `?`.
 - **🧠** is the context size the next request re-sends, against the model's window.
-- **📊** 5h / 7d are your rate-limit windows, when the account reports them.
+- **📊** 5h / 7d are your rate-limit windows. Only subscription plans report them; on API billing the segment is hidden.
 - **💰** is what the session would have cost at API list prices.
 - **💸 saved** is the lifetime total of cold re-sends the keep-alive avoided, less what the pings cost, kept across sessions.
 - **🧊 next** is the cache write the next message would pay if the cache expired, with the cache-read price it pays while warm.
